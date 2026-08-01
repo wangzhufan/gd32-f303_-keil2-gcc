@@ -1,0 +1,7 @@
+E:/wang-test/GD32F303CCT6_code/GD32F303CCT6_Pro/build/CMakeFiles/cmsis.dir
+E:/wang-test/GD32F303CCT6_code/GD32F303CCT6_Pro/build/CMakeFiles/fwlib.dir
+E:/wang-test/GD32F303CCT6_code/GD32F303CCT6_Pro/build/CMakeFiles/hardware.dir
+E:/wang-test/GD32F303CCT6_code/GD32F303CCT6_Pro/build/CMakeFiles/cmbacktrace.dir
+E:/wang-test/GD32F303CCT6_code/GD32F303CCT6_Pro/build/CMakeFiles/GD32F303CCT6_Pro.dir
+E:/wang-test/GD32F303CCT6_code/GD32F303CCT6_Pro/build/CMakeFiles/edit_cache.dir
+E:/wang-test/GD32F303CCT6_code/GD32F303CCT6_Pro/build/CMakeFiles/rebuild_cache.dir

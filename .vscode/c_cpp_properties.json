@@ -1,0 +1,43 @@
+{
+  "configurations": [
+    {
+      "name": "GD32F30X ARM GCC",
+      "includePath": [
+        "${workspaceFolder}/**",
+        "${workspaceFolder}/CMSIS",
+        "${workspaceFolder}/FWLIB/Include",
+        "${workspaceFolder}/FWLIB/Source",
+        "${workspaceFolder}/User",
+        "${workspaceFolder}/HardWare/COMMON",
+        "${workspaceFolder}/HardWare/I2C",
+        "${workspaceFolder}/HardWare/SPI",
+        "${workspaceFolder}/HardWare/SCP",
+        "${workspaceFolder}/HardWare/ADC",
+        "${workspaceFolder}/HardWare/MIPI_RFFE",
+        "${workspaceFolder}/HardWare/PD",
+        "${workspaceFolder}/HardWare/SVI3",
+        "${workspaceFolder}/HardWare/UFCS",
+        "${workspaceFolder}/HardWare/UFCS",
+        "${workspaceFolder}/HardWare/USBD/inc",
+        "${workspaceFolder}/CM_BACKTRACE",
+        "${workspaceFolder}/CM_BACKTRACE/Languages/zh-CN",
+        "${workspaceFolder}/CM_BACKTRACE/Languages/en-US"
+      ],
+      "defines": [
+        "GD32F30X_HD",
+        "USE_STDPERIPH_DRIVER"
+      ],
+      "compilerPath": "arm-none-eabi-gcc",
+      "cStandard": "c99",
+      "cppStandard": "c++17",
+      "intelliSenseMode": "gcc-arm",
+      "compilerArgs": [
+        "-mcpu=cortex-m4",
+        "-mthumb",
+        "-mfloat-abi=hard",
+        "-mfpu=fpv4-sp-d16"
+      ]
+    }
+  ],
+  "version": 4
+}

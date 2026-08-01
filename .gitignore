@@ -1,0 +1,12 @@
+# Ignore "Project/Objects/" folder
+Project/Objects/
+Project/Listings/
+Project/GD32.*
+Project/*.uvguix*
+Project/*.uvoptx
+Project/*.uvprojx
+.workbuddy/*
+*.stackdump
+*.map
+*.lst
+

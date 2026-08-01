@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"E:/wang-test/GD32F303CCT6_code/GD32F303CCT6_Pro/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

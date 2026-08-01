@@ -1,0 +1,29 @@
+{
+  "files.associations": {
+    "*.s": "arm",
+    "*.S": "arm",
+    "*.ld": "linkerscript"
+  },
+  "C_Cpp.default.includePath": [
+    "${workspaceFolder}/CMSIS",
+    "${workspaceFolder}/FWLIB/Include",
+    "${workspaceFolder}/User",
+    "${workspaceFolder}/HardWare/**",
+    "${workspaceFolder}/CM_BACKTRACE"
+  ],
+  "C_Cpp.default.defines": [
+    "GD32F30X_HD",
+    "USE_STDPERIPH_DRIVER"
+  ],
+  "cmake.buildDirectory": "${workspaceFolder}/build",
+  "cmake.configureOnOpen": false,
+  "cortex-debug.armToolchainPath": "",
+  "cortex-debug.openocdPath": "openocd",
+  "search.exclude": {
+    "build/**": true,
+    "Project/**": true
+  },
+  "files.exclude": {
+    "build/**": true
+  }
+}
