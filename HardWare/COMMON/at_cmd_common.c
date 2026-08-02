@@ -42,17 +42,14 @@ static AT_DEAL g_at_deal[AT_END] = {
 { AT_CMD_IICM,          (uint8_t*)"IICM",          i2c_mode_setting              },
 { AT_CMD_SWIRE,         (uint8_t*)"SWIRE",         swire_ctrl_vo                 },
 { AT_CMD_DEBUG,         (uint8_t*)"DEBUG",         device_debug_setting          },
-
 { AT_CMD_WREGX,         (uint8_t*)"WREGX",         device_wregx_test             },
 { AT_CMD_RREGX,         (uint8_t*)"RREGX",         device_rregx_test             },
 { AT_CMD_GPIOX,         (uint8_t*)"GPIOX",         device_gpio_ctrl_save         },
 { AT_CMD_RUNX,          (uint8_t*)"RUNX",          device_run_test               },
 { AT_CMD_GPIOEN,        (uint8_t*)"GPIOEN",        gpio_en                       },
 { AT_CMD_GSWIRE,        (uint8_t*)"GSWIRE",        gswire_set                    },
-
 { AT_CMD_SENDARA,     	(uint8_t*)"SENDARA", 	   sgm_i2c_transmit_ara      	 },
-{ AT_CMD_GPINSTAT,    	(uint8_t*)"GPINSTAT", 	   sgm_get_pin_stat      	 	 },
-
+{ AT_CMD_GPINSTAT,    	(uint8_t*)"GPINSTAT", 	   sgm_get_pin_stat      	 	 }
 };
 
 

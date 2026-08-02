@@ -82,6 +82,7 @@ target_link_libraries(fwlib PUBLIC cmsis)
 set(HARDWARE_BASE
   HardWare/COMMON/at_cmd_common.c
   HardWare/I2C/i2c.c
+  HardWare/COMMON/ring_buffer.c
 )
 
 # Assemble hardware sources based on feature flags

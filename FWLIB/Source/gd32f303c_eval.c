@@ -38,7 +38,8 @@ OF SUCH DAMAGE.
 #include "at_cmd_common.h"
 #include "string.h"
 #include "main.h"
-
+#include "ring_buffer.h"
+extern ring_buffer_t g_ring_buffer;
 /* private variables */
 static uint32_t GPIO_PORT[LEDn] = {LED2_GPIO_PORT, LED3_GPIO_PORT,
                                    LED4_GPIO_PORT, LED5_GPIO_PORT};
@@ -236,58 +237,56 @@ extern struct at_queue g_queue;
 
 void USART0_IRQHandler(void)
 {
-		static struct at_message buffer = { 0 };
+    static struct at_message buffer = { 0 };
     static uint16_t index = 0;
-		uint8_t c = 0;
-    
-		if(usart_interrupt_flag_get(USART0,USART_INT_FLAG_ERR_ORERR) != RESET)
-		{
-			usart_interrupt_flag_clear(USART0,USART_INT_FLAG_ERR_ORERR);
-		}
-		if(usart_interrupt_flag_get(USART0,USART_INT_FLAG_RBNE) != RESET)
-		{
-			usart_interrupt_flag_clear(USART0,USART_INT_FLAG_RBNE);
-			#if 0
-			g_rxbuffer[g_rxcount++] = usart_data_receive(USART0);
-			#else
-			c = usart_data_receive(USART0);
-			if(index==0 && c=='A') {
+    uint8_t c = 0;
+
+    if(usart_interrupt_flag_get(USART0,USART_INT_FLAG_ERR_ORERR) != RESET)
+    {
+        usart_interrupt_flag_clear(USART0,USART_INT_FLAG_ERR_ORERR);
+    }
+    if(usart_interrupt_flag_get(USART0,USART_INT_FLAG_RBNE) != RESET)
+    {
+        usart_interrupt_flag_clear(USART0,USART_INT_FLAG_RBNE);
+        c = usart_data_receive(USART0);
+        ring_buffer_write(&g_ring_buffer, c);
+
+/*          if(index==0 && c=='A') {
         buffer.message[0] = 'A';
         index++;
         return;
-			}
+        }
 
-			if(index==1) {
-					if(c == 'T') {
-							buffer.message[1] = 'T';
-							index++;
-					} else {
-							index = 0;
-							buffer.message[0] = 0;
-					}
-					return;
-			}
-			if (index < 2)
-					return;
-			buffer.message[index++] = c;
-			if(c == '\n') {
-					buffer.len = index;
-					enqueue(&g_queue, &buffer);					
-					memset(buffer.message,0,index);
-					index = 0;
-					return;
-			}
-			
-			if(index >= AT_MESSAGE_MAX_LEN) {					
-					memset(buffer.message,0,index);
-					index = 0;
-			}
-			#endif
-		}
-		if(usart_interrupt_flag_get(USART0,USART_INT_FLAG_TBE) != RESET)
-		{
-			usart_interrupt_flag_clear(USART0,USART_INT_FLAG_TBE);
-		}
+        if(index==1) {
+                if(c == 'T') {
+                        buffer.message[1] = 'T';
+                        index++;
+                } else {
+                        index = 0;
+                        buffer.message[0] = 0;
+                }
+                return;
+        }
+        if (index < 2)
+                return;
+        buffer.message[index++] = c;
+        if(c == '\n') {
+                buffer.len = index;
+                enqueue(&g_queue, &buffer);					
+                memset(buffer.message,0,index);
+                index = 0;
+                return;
+        }
+        
+        if(index >= AT_MESSAGE_MAX_LEN) {					
+                memset(buffer.message,0,index);
+                index = 0;
+        } */
+    }
+    if(usart_interrupt_flag_get(USART0,USART_INT_FLAG_TBE) != RESET)
+    {
+        usart_interrupt_flag_clear(USART0,USART_INT_FLAG_TBE);
+    }
 }
 
 

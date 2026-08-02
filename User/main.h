@@ -40,7 +40,6 @@ OF SUCH DAMAGE.
 
 #include "gd32f30x.h"
 
-#define QUEUE_CAPACITY 10
 #define AT_MESSAGE_MAX_LEN (1024 + 20)
 
 struct at_message
@@ -49,18 +48,7 @@ struct at_message
     uint16_t len;
 };
 
-struct at_queue {
-    struct at_message data[QUEUE_CAPACITY];
-    uint8_t front;
-    uint8_t rear;
-    uint8_t size;
-};
-
 /* led spark function */
 void led_spark(void);
-
-void scp_state_machine(void);
-
-void enqueue(struct at_queue *q, struct at_message *message);
 
 #endif /* MAIN_H */

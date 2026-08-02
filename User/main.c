@@ -43,7 +43,7 @@ OF SUCH DAMAGE.
 #include "systick.h"
 #include "string.h"
 #include "at_cmd_common.h"
-
+#include "ring_buffer.h"
 
 /*!
     \brief      main function
@@ -83,89 +83,121 @@ extern uint8_t g_rxbuffer[USART_MAX_RX_SIZE];
 extern __IO uint16_t g_rxcount;
 extern int g_sgm_debug_flag;
 struct test_param  s_read_write_buff[20];
+ring_buffer_t g_ring_buffer;
+#define BUF_SIZE  512
 
-struct at_queue g_queue = {
-        .front = 1,
-        .rear = 0,
-        .size = 0
-};
+// 状态机状态
+typedef enum {
+    STATE_IDLE,      // 空闲，等待 'A'
+    STATE_A,         // 收到 'A'，等待 'T'
+    STATE_AT,        // 收到 "AT"，等待 '+' 或 '\r'
+    STATE_RECV,      // 接收数据中
+} at_state_t;
 
-bool queue_is_full(struct at_queue *q)
+struct at_message g_at_msg = { 0 };
+
+static at_state_t at_state = STATE_IDLE;
+
+/**
+ * @brief 处理串口接收到的字符（主循环调用）
+ */
+void at_process_char(uint8_t c)
 {
-    return q->size == QUEUE_CAPACITY;
+    // 状态机处理
+    switch(at_state)
+    {
+        case STATE_IDLE:
+            if(c == 'A') {
+                at_state = STATE_A;
+                g_at_msg.len = 0;
+                g_at_msg.message[g_at_msg.len++] = c;
+            }
+            break;
+            
+        case STATE_A:
+            if(c == 'T') {
+                at_state = STATE_AT;
+                g_at_msg.message[g_at_msg.len++] = c;
+            } else {
+                at_state = STATE_IDLE;  // 不是"AT"，重置
+                g_at_msg.len = 0;
+            }
+            break;
+            
+        case STATE_AT:
+            if(c == '+') {
+                at_state = STATE_RECV;
+                g_at_msg.message[g_at_msg.len++] = c;
+            } else if(c == '\r' || c == '\n') {
+                // AT+ 没有+，可能是查询指令如 AT+VERSION\r\n
+                // 但我们只处理 AT+ 开头的，丢弃
+                at_state = STATE_IDLE;
+                g_at_msg.len = 0;
+            } else {
+                // 不是 '+'，重置
+                at_state = STATE_IDLE;
+                g_at_msg.len = 0;
+            }
+            break;
+            
+        case STATE_RECV:
+            // 接收数据，直到遇到 \r\n
+            if(c == '\n' && g_at_msg.len > 0 && g_at_msg.message[g_at_msg.len-1] == '\r')
+            {
+                // 完整指令，去掉末尾的 \r
+                g_at_msg.message[g_at_msg.len-1] = '\0';
+                if (g_sgm_debug_flag > 0)
+						printf("%s,len = %d!\n",g_rxbuffer,g_rxcount);
+                uart_buff_parse(g_at_msg.message, g_at_msg.len-1);
+                
+                // 重置状态
+                at_state = STATE_IDLE;
+                g_at_msg.len = 0;
+            }
+            else
+            {
+                // 存储数据
+                if(g_at_msg.len < BUF_SIZE-1) {
+                    g_at_msg.message[g_at_msg.len++] = c;
+                } else {
+                    // 溢出，重置
+                    at_state = STATE_IDLE;
+                    g_at_msg.len = 0;
+                }
+            }
+            break;
+            
+        default:
+            at_state = STATE_IDLE;
+            g_at_msg.len = 0;
+            break;
+    }
 }
 
-bool queue_is_empty(struct at_queue *q)
+/**
+ * @brief 从ring_buffer读取数据并处理
+ */
+void at_process_ring(void)
 {
-    return q->size == 0;
-}
-
-void dequeue(struct at_queue *q)
-{
-		if(queue_is_empty(q)) {        
-				q->front = 1;
-				q->rear = 0;
-        return ;
-    }		
-    memset(q->data[q->front].message, 0, q->data[q->front].len);
-		q->data[q->front].len = 0;
-		
-    --q->size;
-    ++q->front;
-    if(q->front == QUEUE_CAPACITY) {
-        q->front = 0;
+    uint8_t c;
+    uint32_t count;
+    
+    ring_buffer_get_count(&g_ring_buffer, &count);
+    
+    while(count > 0)
+    {
+        ring_buffer_read(&g_ring_buffer, &c);
+        count--;
+        at_process_char(c);  // 喂给状态机
     }
-		
-		if(queue_is_empty(q)) {        
-				q->front = 1;
-				q->rear = 0;
-        return ;
-    }
-}
-
-void enqueue(struct at_queue *q, struct at_message *message)
-{
-		if(message->len > AT_MESSAGE_MAX_LEN) {			
-        return;
-    }
-		
-    if(queue_is_full(q)) {				
-        //dequeue(q);
-        return;
-    }
-		
-		++q->rear;
-    ++q->size;
-    if(q->rear == QUEUE_CAPACITY) {				
-        q->rear = 0;
-    }
-
-    q->data[q->rear].len = message->len;
-    memcpy(q->data[q->rear].message, message->message, message->len);
-}
-
-static bool queue_head(struct at_queue *q, struct at_message *m)
-{
-    if(queue_is_empty(q)) {
-        m->len = 0;
-				q->front = 1;
-				q->rear = 0;
-        return 0;
-    }
-
-    memcpy(m->message, q->data[q->front].message, q->data[q->front].len);
-    m->len = q->data[q->front].len;
-		
-		return 1;
 }
 
 int main(void)
 { 
-	struct at_message msg = { 0 };
 
     systick_config();
 
-#if 0
+#if 1
     /* USART interrupt configuration */
     nvic_irq_enable(USART0_IRQn, 0, 0);
 
@@ -216,32 +248,13 @@ int main(void)
 	/**************************cm_backtrace_init**********************/
 	cm_backtrace_init("GD32", FW_VERSION_NUM, FW_VERSION_NUM);
 
+    /**************************ring buffer_init**********************/
+    ring_buffer_init(&g_ring_buffer);
+    memset(&g_at_msg,0,sizeof(g_at_msg));
 
     while(1) {
-			#if 0
-			if ('A' == g_rxbuffer[0] && '\n' == g_rxbuffer[g_rxcount - 1])
-			{
-					if (g_sgm_debug_flag > 0)
-						printf("%s,len = %d!\n",g_rxbuffer,g_rxcount);
-					uart_buff_parse(g_rxbuffer,g_rxcount);
-					memset(g_rxbuffer,0,g_rxcount);
-					g_rxcount = 0;
-			}
-			#else
 
-            printf("wang test33333!\n");
-            delay_1ms(1000);
-			memset(&msg,0,sizeof(msg));
-			if (queue_head(&g_queue, &msg))	
-			{	
-				if (g_sgm_debug_flag > 0)
-					printf("msg: %s,len = %d!\n",msg.message,msg.len);				
-				dequeue(&g_queue);
-				uart_buff_parse(msg.message,msg.len);
-			}
-			
-			#endif
-
+            at_process_ring();
 		}
 }
 

@@ -50,9 +50,6 @@ typedef enum{
 	AT_CMD_IICM,
 	AT_CMD_SWIRE,
 	AT_CMD_DEBUG,
-	AT_CMD_SPIEN,	
-	AT_CMD_SPIT,	
-
 	AT_CMD_WREGX,
 	AT_CMD_RREGX,
     AT_CMD_GPIOX,
@@ -61,17 +58,8 @@ typedef enum{
 	AT_CMD_GSWIRE,
 	AT_CMD_LEDE,
 	AT_CMD_I2CTRANS,
-#ifdef SGM6030_TEST
-	AT_CMD_STEST,
-	AT_CMD_SRUN,
-#endif
-
 	AT_CMD_SENDARA,
-	AT_CMD_BROADCAST,
 	AT_CMD_GPINSTAT,
-    AT_CMD_ADCEN,
-    AT_CMD_GADC,
-
     AT_END
 }AT_Cmd;
 
@@ -102,7 +90,6 @@ unsigned char CRC8_Calculate(unsigned char *pData, unsigned char Size);
 
 /****************************************************/
 int sgm_upgrade(uint8_t index,uint32_t* param,uint8_t count);
-
 int device_get_addr_index(uint8_t index,uint32_t* param,uint8_t count);
 int sgm_i2c_transmit(uint8_t index,uint32_t* param,uint8_t count);
 int device_baudrate_setting(uint8_t index,uint32_t* param,uint8_t count);
@@ -124,16 +111,12 @@ int device_test_read_reg(uint8_t index,uint32_t* param,uint8_t count);
 int page_write_reg(uint8_t index,uint32_t* param,uint8_t count);
 int page_read_reg(uint8_t index,uint32_t* param,uint8_t count);
 int jump_read_reg(uint8_t index,uint32_t* param,uint8_t count);
-
 int device_wregx_test(uint8_t index,uint32_t* param,uint8_t count);
 int device_rregx_test(uint8_t index,uint32_t* param,uint8_t count);
 int device_gpio_ctrl_save(uint8_t index,uint32_t* param,uint8_t count);
 int device_run_test(uint8_t index,uint32_t* param,uint8_t count);
-
-
 int gpio_en(uint8_t index,uint32_t* param,uint8_t count);
 int gswire_set(uint8_t index,uint32_t* param,uint8_t count);
-
 int sgm_i2c_transmit_ara(uint8_t index,uint32_t* param,uint8_t count);
 int sgm_get_pin_stat(uint8_t index,uint32_t* param,uint8_t count);
 

@@ -596,6 +596,7 @@ GD32F303CCT6_Pro/
 │   ├── tasks.json                 # 构建/烧录任务
 │   ├── settings.json              # 工作区设置
 │   └── c_cpp_properties.json      # IntelliSense
+├── build.bat                      # ★ 新增: 一键编译/烧录脚本
 ├── build/                         # CMake 构建输出 (gitignore)
 └── docs/
     └── Keil_to_GCC_移植指南.md     # ★ 本文档
@@ -623,11 +624,66 @@ GD32F303CCT6_Pro/
 
 ---
 
-## 构建命令
+## 构建与烧录
+
+### 9.1 build.bat 一键脚本
+
+为了方便日常开发，提供了 `build.bat` 脚本，支持两种模式：
+
+```batch
+:: 仅编译
+build
+
+:: 编译 + 自动烧录
+build flash
+```
+
+**脚本内部逻辑**:
+```batch
+@echo off
+setlocal EnableDelayedExpansion
+
+set BUILD_DIR=build
+set OPENOCD_INTERFACE=interface/stlink.cfg
+set OPENOCD_TARGET=target/stm32f3x.cfg
+set BINARY=%BUILD_DIR%\GD32F303CCT6_Pro
+
+:: 创建 build 目录并配置 CMake（首次会自动配置）
+if not exist %BUILD_DIR% (
+    cmake -B %BUILD_DIR% -G "Ninja" ^
+        -DCMAKE_TOOLCHAIN_FILE=cmake/arm-gcc-toolchain.cmake ^
+        -DCMAKE_BUILD_TYPE=Debug
+)
+
+:: 编译
+cmake --build %BUILD_DIR%
+if errorlevel 1 (
+    echo [ERROR] Build failed
+    exit /b 1
+)
+
+:: 如果带 flash 参数，自动烧录
+if /I "%~1"=="flash" (
+    openocd -f %OPENOCD_INTERFACE% -f %OPENOCD_TARGET% ^
+        -c "program %BINARY% verify reset exit"
+)
+```
+
+> **注意**: Windows PowerShell 中运行脚本需加 `.\` 前缀：`.\build` 或 `.\build flash`。CMD 命令提示符中可直接输入 `build`。
+
+### 9.2 VSCode 集成
+
+| 操作 | 快捷键 | 说明 |
+|------|--------|------|
+| 仅编译 | `Ctrl+Shift+B` → `Build + Flash` | tasks.json 中配置 |
+| 仅烧录 | `Ctrl+Shift+P` → `Run Task` → `Flash Only` | 跳过编译直接烧录 |
+| 编译+烧录+调试 | `F5` | Cortex-Debug 全自动 |
+
+### 9.3 手动命令（备用）
 
 ```bash
 # 配置 (首次)
-cmake -B build -G "MinGW Makefiles" \
+cmake -B build -G "Ninja" \
   -DCMAKE_TOOLCHAIN_FILE=cmake/arm-gcc-toolchain.cmake \
   -DCMAKE_BUILD_TYPE=Debug .
 
@@ -638,6 +694,27 @@ cmake --build build
 openocd -f interface/stlink.cfg -f target/stm32f3x.cfg \
   -c "program build/GD32F303CCT6_Pro verify reset exit"
 ```
+
+## 10. 运行验证
+
+烧录完成后，通过串口助手（SSCOM）连接板子的 USART0（波特率 115200），可看到固件正常运行：
+
+```
+[22:23:26.663]收◆◆wang test33333!
+[22:23:27.671]收◆◆wang test33333!
+```
+
+**验证要点**:
+- `printf` 通过 `_write` → `fputc` → USART0 正确输出
+- 串口每 1 秒打印一次，说明 `systick` 定时和主循环正常
+- 没有出现 HardFault，程序稳定运行
+
+这表明三个核心修复全部生效：
+1. **VTOR 初始化** — 复位后 CPU 从 Flash 正确启动
+2. **`.data` 段复制** — 全局变量在 RAM 中有正确初始值
+3. **`syscalls.c`** — `printf` 和 `malloc` 的底层支撑到位
+
+---
 
 ## 固件占用
 

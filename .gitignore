@@ -6,6 +6,7 @@ Project/*.uvguix*
 Project/*.uvoptx
 Project/*.uvprojx
 .workbuddy/*
+build/*
 *.stackdump
 *.map
 *.lst
