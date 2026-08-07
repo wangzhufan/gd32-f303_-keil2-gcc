@@ -903,10 +903,11 @@ int sgm_i2c_read_byte(uint8_t reg, uint8_t *val)
 	uint8_t tmp = 0;
 	int ret = 0;
 	
-    if (s_iic_clock_speed == HIGH_SPEED_I2C)
-        ret = gpio_to_IIC_Read_One_Byte(g_sgm_slave_addr, reg, &tmp); 
-    else    
+    if (s_iic_clock_speed == HIGH_SPEED_I2C) {
+        ret = gpio_to_IIC_Read_One_Byte(g_sgm_slave_addr, reg, &tmp);
+    } else {
         ret = i2c_buffer_read(g_sgm_slave_addr, reg, &tmp, 1, 1000);
+    }
 	if (ret) {
 		//printf("Failed: reg=%02X, ret=%d\n", reg, ret);
 		return ret;
@@ -918,21 +919,23 @@ int sgm_i2c_read_byte(uint8_t reg, uint8_t *val)
 int sgm_i2c_write_byte(uint8_t reg, uint8_t val)
 {
     int ret;	
-    if (s_iic_clock_speed == HIGH_SPEED_I2C)
+    if (s_iic_clock_speed == HIGH_SPEED_I2C) {
         ret = gpio_to_IIC_Write_One_Byte(g_sgm_slave_addr, reg, val);
-    else
+    } else {
         ret = i2c_buffer_write(g_sgm_slave_addr, reg, &val, 1,1000, true);
+    }
 	return ret;	
 }
 
 int sgm_i2c_read_block_data(uint8_t reg, uint8_t *data,uint8_t len)
 {	
 	int ret = 0;
-	if (s_iic_clock_speed == HIGH_SPEED_I2C)
+	if (s_iic_clock_speed == HIGH_SPEED_I2C) {
         ret = gpio_to_IIC_Read_block(g_sgm_slave_addr, reg, data, len);
-    else
+    } else {
         ret = i2c_buffer_read(g_sgm_slave_addr, reg, data, len, 1000);
-	
+    }
+
 	if (ret) {
 		//printf("Failed: reg=%02X, ret=%d\n", reg, ret);
 		return ret;
@@ -944,11 +947,12 @@ int sgm_i2c_read_block_data(uint8_t reg, uint8_t *data,uint8_t len)
 int sgm_i2c_write_block_data(uint8_t reg, uint8_t *data,uint8_t len)
 {	
 	int ret = 0;
-    if (s_iic_clock_speed == HIGH_SPEED_I2C)
+    if (s_iic_clock_speed == HIGH_SPEED_I2C) {
         ret = gpio_to_IIC_Write_block(g_sgm_slave_addr, reg, data, len);
-    else
+    } else {
         ret = i2c_buffer_write(g_sgm_slave_addr, reg, data, len, 1000, true);
-	
+    }
+
 	if (ret) {
 		//printf("Failed: reg=%02X, ret=%d\n", reg, ret);
 		return ret;
@@ -1041,7 +1045,7 @@ out:
 	return ret;
 }
 
-//³õÊ¼»¯IIC
+//ï¿½ï¿½Ê¼ï¿½ï¿½IIC
 void swire_init(void)
 {					     
 	rcu_periph_clock_enable(RCU_GPIOB);	/* ??GPIOB?? */

@@ -147,7 +147,7 @@ void at_process_char(uint8_t c)
                 // 完整指令，去掉末尾的 \r
                 g_at_msg.message[g_at_msg.len-1] = '\0';
                 if (g_sgm_debug_flag > 0)
-						printf("%s,len = %d!\n",g_rxbuffer,g_rxcount);
+						printf("%s,len = %d!\n",g_at_msg.message,g_at_msg.len-1);
                 uart_buff_parse(g_at_msg.message, g_at_msg.len-1);
                 
                 // 重置状态

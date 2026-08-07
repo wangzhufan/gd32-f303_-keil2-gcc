@@ -22,7 +22,7 @@ int _write(int file, char *ptr, int len)
     int i;
     (void)file;
     for (i = 0; i < len; i++) {
-        fputc((int)ptr[i], NULL);
+        fputc((int)ptr[i], (void *)1);
     }
     return len;
 }

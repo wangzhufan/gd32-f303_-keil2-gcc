@@ -237,8 +237,6 @@ extern struct at_queue g_queue;
 
 void USART0_IRQHandler(void)
 {
-    static struct at_message buffer = { 0 };
-    static uint16_t index = 0;
     uint8_t c = 0;
 
     if(usart_interrupt_flag_get(USART0,USART_INT_FLAG_ERR_ORERR) != RESET)

@@ -83,7 +83,7 @@ void at_cmd_parse(uint8_t* cmd_str,uint32_t* param,uint8_t count)
 
 void uart_buff_parse(uint8_t *str,uint16_t str_len)
 {
-	int i,equal_count;
+	int i,equal_count = 0;
 	bool equal_flag = 0;
 	uint32_t position = 0;
 	uint8_t param_temp[13] = {0};
@@ -126,7 +126,7 @@ void uart_buff_parse(uint8_t *str,uint16_t str_len)
 			if (1 == g_sgm_debug_flag)
 			{
 				printf("str %s,cmd_str = %s equal_count =%d\r\n",str,cmd_str,equal_count);
-				printf("%s param %u,%u,%u,%u,index=%d \r\n",str,param[0],param[1],param[2],param[3],index);
+				printf("%s param %lu,%lu,%lu,%lu,index=%d \r\n",str,param[0],param[1],param[2],param[3],index);
 			}
 			at_cmd_parse(cmd_str,param,index+1);
 		}else {             
@@ -1089,7 +1089,7 @@ int device_run_test(uint8_t index,uint32_t* param,uint8_t count)
                 str_len += snprintf((char*)data+str_len,255,"[%d]",data[j]);
             }
             
-            temp_len += sprintf((char*)temp + temp_len, "%s:%s",g_at_deal[index].at_str,data);
+            temp_len += snprintf((char*)temp + temp_len, 255 - temp_len, "%s:%s",g_at_deal[index].at_str,data);
             memset(data,'\0',str_len); 
             //printf("%s: %s\n",g_at_deal[index].at_str,data);            
         }        
